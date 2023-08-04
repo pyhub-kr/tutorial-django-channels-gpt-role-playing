@@ -12,6 +12,7 @@ class RolePlayingRoomConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.gpt_messages: List[GptMessage] = []
+        self.recommend_message = ""  # 🔥 ADDED
 
     # 웹소켓 연결 요청을 받으면 호출됩니다.
     def connect(self):
@@ -22,6 +23,8 @@ class RolePlayingRoomConsumer(JsonWebsocketConsumer):
             self.accept()
 
             self.gpt_messages = room.get_initial_messages()
+            self.recommend_message = room.get_recommend_message()
+
             # self._gpt_messages 기반으로 gpt api 호출.
             # print(f"{self.gpt_messages=}")
             try:
@@ -81,6 +84,12 @@ class RolePlayingRoomConsumer(JsonWebsocketConsumer):
             self.send_json({
                 "type": "assistant-message",
                 "message": assistant_message,
+            })
+        elif content_dict["type"] == "request-recommend-message":
+            recommended_message = self.gpt_query(command_query=self.recommend_message)
+            self.send_json({
+                "type": "recommended-message",
+                "message": recommended_message,
             })
         else:
             self.send_json({

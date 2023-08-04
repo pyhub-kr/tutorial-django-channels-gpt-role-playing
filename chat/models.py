@@ -84,3 +84,20 @@ class RolePlayingRoom(models.Model):
             GptMessage(role="system", content=system_message),
             GptMessage(role="user", content=user_message),
         ]
+
+    def get_recommend_message(self) -> str:
+        """대화 메세지 추천받기"""
+
+        if self.level == self.Level.BEGINNER:
+            level_word = "simple"
+        elif self.level == self.Level.ADVANCED:
+            level_word = "advanced"
+        else:
+            raise ValueError(f"Invalid level : {self.level}")
+
+        return (
+            f"Can you please provide me an {level_word} example "
+            f"of how to respond to the last sentence "
+            f"in this situation, without providing a translation "
+            f"and any introductory phrases or sentences."
+        )

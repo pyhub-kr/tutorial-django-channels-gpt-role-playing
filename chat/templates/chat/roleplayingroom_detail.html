@@ -55,6 +55,7 @@
                     </div>
                     <select id="voice-list" class="form-select mb-2"></select>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-secondary" id="recommend-button">추천받기</button>
                         <form id="message-form" class="d-flex gap-1 flex-grow-1">
                             <input type="text"
                                    name="message"
@@ -142,6 +143,12 @@ function sayMessage(message) {
                 sayMessage(message);
             }
         }
+        else if ( message_obj.type === "recommended-message" ) {
+            const { message } = message_obj;
+            console.log("recommended-message:", message);
+            document.querySelector("#message-form [name='message']").value = message;
+            recommendButton.disabled = false;
+        }
         else if ( message_obj.type === "openai-error" ) {
             const { message } = message_obj;
             alert(`Error: ${message}`);
@@ -152,6 +159,12 @@ function sayMessage(message) {
 
         console.groupEnd();
     };
+
+    const recommendButton = document.querySelector("#recommend-button");
+    recommendButton.addEventListener("click", () => {
+        recommendButton.disabled = true;
+        ws.send(JSON.stringify({ type: "request-recommend-message" }));
+    });
 
     const messageForm = document.getElementById("message-form");
     messageForm.onsubmit = function(e) {
