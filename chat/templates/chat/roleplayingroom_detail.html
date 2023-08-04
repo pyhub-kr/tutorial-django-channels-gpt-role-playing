@@ -41,6 +41,7 @@
                     <ul id="chat-message-list"></ul>
                 </div>
                 <div class="card-footer">
+                    <select id="voice-list" class="form-select mb-2"></select>
                     <div class="d-flex gap-2">
                         <form id="message-form" class="d-flex gap-1 flex-grow-1">
                             <input type="text"
@@ -64,6 +65,7 @@
 
 {% block script %}
 {{ roleplayingroom.pk|json_script:"room-pk" }}
+{{ roleplayingroom.language|json_script:"room-language" }}
 
 <script>
 
@@ -78,6 +80,8 @@ function addMessage(message, isMe) {
 
 (function() {
     const room_pk = document.querySelector("#room-pk").textContent;
+    const room_language = JSON.parse(document.querySelector("#room-language").textContent);
+
     const ws = new WebSocket(`ws://${window.location.host}/ws/chat/${room_pk}/`);
 
     ws.onopen = function(e) { console.log("장고 채널스 서버와 웹소켓 연결되었습니다."); };
@@ -120,6 +124,23 @@ function addMessage(message, isMe) {
             ws.send(JSON.stringify({ type: "user-message", message: message }));  // 🔥 HERE
             e.target.reset();
         }
+    };
+
+    // 이 코드는 페이지가 처음 로드되었을 때 사용 가능한 음성이 로드되어야 하므로, voiceschanged 이벤트를 기다립니다.
+    // Chrome과 Edge브라우저에서는 동작을 확인했지만, Safari에서는 이벤트가 발생하지 않았습니다.
+    window.speechSynthesis.onvoiceschanged = function() {
+        // getVoices 메서드를 사용하여 사용 가능한 모든 음성을 가져옵니다.
+        const voices = window.speechSynthesis.getVoices();
+
+        voices.forEach(({ name, lang }) => {
+            if ( lang.toLowerCase() === room_language.toLowerCase() ) {
+                const option = document.createElement("option");
+                option.value = name;
+                option.textContent = name;
+                option.selected = true;  // 마지막 음성을 선택합니다.
+                document.querySelector("#voice-list").appendChild(option);
+            }
+        })
     };
 })();
 </script>
