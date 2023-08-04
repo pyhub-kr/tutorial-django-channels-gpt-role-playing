@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 # from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, ListView
+from django.views.generic import CreateView, UpdateView, ListView, DetailView
 
 from chat.forms import RolePlayingRoomForm
 from chat.models import RolePlayingRoom
@@ -20,6 +20,19 @@ class RolePlayingRoomListView(ListView):
 
 
 role_playing_room_list = RolePlayingRoomListView.as_view()
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class RolePlayingRoomDetailView(DetailView):
+    model = RolePlayingRoom
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        qs = qs.filter(user=self.request.user)
+        return qs
+
+
+role_playing_room_detail = RolePlayingRoomDetailView.as_view()
 
 
 # 아직 로그인 기능을 구현하지 않았기에, admin 앱의 로그인 기능을 활용토록 합니다.

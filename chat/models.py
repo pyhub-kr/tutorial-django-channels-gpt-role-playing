@@ -3,6 +3,7 @@
 from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.db import models
+from django.urls import reverse
 
 
 class RolePlayingRoom(models.Model):
@@ -35,3 +36,6 @@ class RolePlayingRoom(models.Model):
     gpt_role = models.CharField(max_length=100, verbose_name="GPT 역할")
     gpt_role_en = models.CharField(max_length=100, blank=True, verbose_name="GPT 역할 (영문)",
                                    help_text="GPT 프롬프트에 직접적으로 활용됩니다. 비워두시면, 자동으로 번역됩니다.")
+
+    def get_absolute_url(self) -> str:
+        return reverse("role_playing_room_detail", args=[self.pk])
