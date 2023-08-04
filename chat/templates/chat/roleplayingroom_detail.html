@@ -69,5 +69,8 @@
     <div class="my-3">
         <a href="{% url 'role_playing_room_edit' roleplayingroom.pk %}"
            class="btn btn-primary">수정</a>
+        {# 🔥 HERE #}
+        <a href="{% url 'role_playing_room_delete' roleplayingroom.pk %}"
+           class="btn btn-danger">삭제</a>
     </div>
 {% endblock %}
