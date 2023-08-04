@@ -48,6 +48,11 @@
                     <ul id="chat-message-list"></ul>
                 </div>
                 <div class="card-footer">
+                    <div class="d-grid gap-2 mb-2">
+                        <button class="btn btn-primary" id="auto-play-button">
+                            자동 읽기 시작
+                        </button>
+                    </div>
                     <select id="voice-list" class="form-select mb-2"></select>
                     <div class="d-flex gap-2">
                         <form id="message-form" class="d-flex gap-1 flex-grow-1">
@@ -113,6 +118,7 @@ function sayMessage(message) {
 (function() {
     const room_pk = document.querySelector("#room-pk").textContent;
     const room_language = JSON.parse(document.querySelector("#room-language").textContent);
+    let is_auto_play = false;
 
     const ws = new WebSocket(`ws://${window.location.host}/ws/chat/${room_pk}/`);
 
@@ -132,6 +138,9 @@ function sayMessage(message) {
             console.log("assistant-message:", message);
             // 채팅 UI에 메시지를 추가하는 코드.
             addMessage(message, false);  // ⭐️ 추가됨
+            if(is_auto_play) {
+                sayMessage(message);
+            }
         }
         else if ( message_obj.type === "openai-error" ) {
             const { message } = message_obj;
@@ -157,6 +166,12 @@ function sayMessage(message) {
             e.target.reset();
         }
     };
+
+    const autoPlayButton = document.querySelector("#auto-play-button");
+    autoPlayButton.addEventListener("click", () => {
+        is_auto_play = true;
+        autoPlayButton.remove();
+    });
 
     // 이 코드는 페이지가 처음 로드되었을 때 사용 가능한 음성이 로드되어야 하므로, voiceschanged 이벤트를 기다립니다.
     // Chrome과 Edge브라우저에서는 동작을 확인했지만, Safari에서는 이벤트가 발생하지 않았습니다.
