@@ -11,9 +11,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from environ import Env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+env = Env()
+
+# .env 경로에 파일이 있으면, 환경변수로서 읽어들입니다.
+env_path: Path = BASE_DIR / '.env'
+if env_path.is_file():
+    # .env 파일에 한글이 포함된 경우도 처리하기 위해 encoding="utf8"을 지정해줍니다.
+    # encoding="utf8"을 지정하지 않으면 윈도우에서 구동 시에 오류가 발생합니다.
+    with env_path.open('rt', encoding='utf-8') as f:
+        env.read_env(f, overwrite=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -104,7 +116,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# 기존 settings.py 파일에 LANGUAGE_CODE 설정이 있습니다. 그 코드를 변경해줍니다.
+LANGUAGE_CODE = env.str("LANGUAGE_CODE", default="en-us")
 
 TIME_ZONE = 'UTC'
 
@@ -122,3 +135,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# OpenAI API key
+# https://platform.openai.com/account/api-keys
+# default 인자를 지정하지 않았기에, 지정 환경변수가 없으면 ImproperlyConfigured 예외가 발생합니다.
+
+OPENAI_API_KEY = env.str("OPENAI_API_KEY")
