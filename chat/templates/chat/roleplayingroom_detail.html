@@ -66,6 +66,16 @@
 {{ roleplayingroom.pk|json_script:"room-pk" }}
 
 <script>
+
+function addMessage(message, isMe) {
+    const messageList = document.getElementById("chat-message-list");
+    const messageElement = document.createElement("li");
+    messageElement.className = "chat-message" + (isMe ? " me" : "");
+    messageElement.innerHTML = `<span class="message">${message}</span>`;
+    messageList.appendChild(messageElement);
+    messageList.scrollTop = messageList.scrollHeight;
+}
+
 (function() {
     const room_pk = document.querySelector("#room-pk").textContent;
     const ws = new WebSocket(`ws://${window.location.host}/ws/chat/${room_pk}/`);
@@ -84,7 +94,8 @@
         if ( message_obj.type === "assistant-message" ) {
             const { message } = message_obj;
             console.log("assistant-message:", message);
-            // TODO: 채팅 UI에 메시지를 추가하는 코드.
+            // 채팅 UI에 메시지를 추가하는 코드.
+            addMessage(message, false);  // ⭐️ 추가됨
         }
         else if ( message_obj.type === "openai-error" ) {
             const { message } = message_obj;
