@@ -75,8 +75,15 @@ class RolePlayingRoomConsumer(JsonWebsocketConsumer):
         return room
 
     # 웹소켓 유저로부터 메시지를 받으면 receive_json 메서드가 호출됩니다.
-    def receive_json(self, content, **kwargs):
-        # gpt-3.5-turbo API 호출을 통해 응답을 생성하고,
-        # self.send_json을 통해 응답 메시지를 웹소켓 유저에게 전송합니다.
-        # self.send_json({ 임의의_사전_데이터 })
-        self.send_json(content)  # Echo 응답.
+    def receive_json(self, content_dict, **kwargs):
+        if content_dict["type"] == "user-message":
+            assistant_message = self.gpt_query(user_query=content_dict["message"])
+            self.send_json({
+                "type": "assistant-message",
+                "message": assistant_message,
+            })
+        else:
+            self.send_json({
+                "type": "error",
+                "message": f"Invalid type: {content_dict['type']}",
+            })
