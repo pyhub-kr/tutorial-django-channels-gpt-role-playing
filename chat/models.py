@@ -1,9 +1,15 @@
 # chat/models.py
+from typing import TypedDict, Literal, List
 
 from django.conf import settings
 from django.core.validators import MinLengthValidator
 from django.db import models
 from django.urls import reverse
+
+
+class GptMessage(TypedDict):
+    role: Literal["system", "user", "assistant"]
+    content: str
 
 
 class RolePlayingRoom(models.Model):
@@ -39,3 +45,42 @@ class RolePlayingRoom(models.Model):
 
     def get_absolute_url(self) -> str:
         return reverse("role_playing_room_detail", args=[self.pk])
+
+    def get_initial_messages(self) -> List[GptMessage]:
+        gpt_name = "RolePlayingBot"
+        language = self.get_language_display()
+        situation_en = self.situation_en
+        my_role_en = self.my_role_en
+        gpt_role_en = self.gpt_role_en
+
+        if self.level == self.Level.BEGINNER:
+            level_string = f"a beginner in {language}"
+            level_word = "simple"
+        elif self.level == self.Level.ADVANCED:
+            level_string = f"an advanced learner in {language}"
+            level_word = "advanced"
+        else:
+            raise ValueError(f"Invalid level : {self.level}")
+
+        system_message = (
+            f"You are helpful assistant supporting people learning {language}. "
+            f"Your name is {gpt_name}. "
+            f"Please assume that the user you are assisting is {level_string}. "
+            f"And please write only the sentence without the character role."
+        )
+
+        user_message = (
+            f"Let's have a conversation in {language}. "
+            f"Please answer in {language} only "
+            f"without providing a translation. "
+            f"And please don't write down the pronunciation either. "
+            f"Let us assume that the situation in '{situation_en}'. "
+            f"I am {my_role_en}. The character I want you to act as is {gpt_role_en}. "
+            f"Please make sure that I'm {level_string}, so please use {level_word} words "
+            f"as much as possible. Now, start a conversation with the first sentence!"
+        )
+
+        return [
+            GptMessage(role="system", content=system_message),
+            GptMessage(role="user", content=user_message),
+        ]
