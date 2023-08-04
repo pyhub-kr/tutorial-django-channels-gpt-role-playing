@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_bootstrap5',
     'chat',
 ]
 
@@ -142,3 +143,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # default 인자를 지정하지 않았기에, 지정 환경변수가 없으면 ImproperlyConfigured 예외가 발생합니다.
 
 OPENAI_API_KEY = env.str("OPENAI_API_KEY")
+
+
+# django-bootstrap5
+# https://django-bootstrap5.readthedocs.io/en/stable/settings.html
+
+BOOTSTRAP5 = {
+    "required_css_class": "fw-bold",
+    "set_placeholder": False,
+}
